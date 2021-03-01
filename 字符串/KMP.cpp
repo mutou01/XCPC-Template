@@ -73,3 +73,48 @@ int main()
     cout << "返回模式串T在字串中出现的次数是: "<< KMP_Count() << endl;
     return 0;
 }
+
+/*----------------------------------*/
+
+//预处理前缀数组,前缀数组用于在字符串失配时进行转跳
+#define MAXN 35000
+int pi[MAXN];//前缀函数
+void prefix_function(string s){
+    memset(pi,0,sizeof(pi));
+    for(int i=1;i<s.size();i++){
+        int p = pi[i-1];
+        while(p>0&&s[p]!=s[i])p=pi[p-1];
+        if(s[i]==s[p])  pi[i]=++p;
+    }
+    return ;
+}
+
+//KMP写法一,不需要预处理版本
+//将两个字符串拼接,如果从前往后求前缀,如果前缀为模式串长度,则匹配成功
+vector<int> kmp(string s1,string s2){
+    vector<int> appear;
+    string s = s2+'%'+s1;//ATTENTION!!这个百分号应该是不存在于s1和s2中的任字符
+    for (int i = 1; i < s.size(); i++) {
+        int p = pi[i - 1];
+        while (p > 0 && s[i] != s[p]) p = pi[p - 1];
+        if (s[i] == s[p]) p++;
+        pi[i] = p;
+        if(pi[i]==s2.size())
+            appear.push_back(i-2-s2.size());//注意这里要根据字符串首字母为止为0或1进行微调
+                                            //此时为1
+    }
+    return appear;
+}
+
+//KMP写法2,需要对模式串进行预处理
+vector<int> kmp(string s1,string s2){
+    vector<int> appear;
+    int p=0;
+    for(int i=0;i<s1.size();i++){
+        while (p > 0 && s1[i] != s2[p]) p = pi[p - 1];
+        if (s1[i] == s2[p]) p++;
+        if(p==s2.size())
+            appear.push_back(i+2-s2.size());//要注意同理
+    }
+    return appear;
+}
