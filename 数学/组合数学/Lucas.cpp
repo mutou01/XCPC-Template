@@ -1,10 +1,5 @@
 // p一定为质数
-
-#include <iostream>
-using namespace std;
-
 typedef long long ll;
-
 const int N = 1e7 + 10;
 
 ll p; // C(n,m) % p
@@ -17,7 +12,7 @@ void Init()
     for(int i = 2;i <= p; i++)
     {
         f[i] = f[i - 1] * i % p;
-        inv[i] = (p - (p / i)) * inv[p % i] % p;
+        inv[i] = p - (p / i) * inv[p % i] % p;
         invF[i] = invF[i - 1] * inv[i] % p;
     }
 }
