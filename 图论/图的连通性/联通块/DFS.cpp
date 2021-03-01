@@ -1,13 +1,9 @@
-#include<bits/stdc++.h>
-using namespace std;
 const int maxn = 5e5 + 10;
-
 int n, m;
 vector<int> vec[maxn];
 int vis[maxn]; // 标记数组
 
-void DFS(int u)
-{
+void DFS(int u) {
     vis[u] = 1;
     for(int i = 0;i < vec[u].size(); i++) {
         int v = vec[u][i];
@@ -16,8 +12,7 @@ void DFS(int u)
     }
 }
 
-void solve()
-{
+void solve() {
     cin >> n >> m;
     int u, v;
     for(int i = 1;i <= m; i++) {
