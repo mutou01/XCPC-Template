@@ -1,18 +1,8 @@
-
-#include <iostream>
-using namespace std;
-
-typedef long long ll;
-
 const int N = 1e5 + 10;
-
-int mu[N]; // 莫比乌斯函数
 bool is_prime[N];
-int prime[N];   
-int cnt;
-int sum[N];
+int prime[N], mu[N], cnt;
 
-void Init() {
+void makeMobius() {
     mu[1] = 1; is_prime[0] = is_prime[1] = true;
     for(int i = 2;i < N; i++) {
         if (!is_prime[i]) {
@@ -27,9 +17,5 @@ void Init() {
             }
             mu[i * prime[j]] = -mu[i];
         }
-    }
-
-    for(int i = 1;i < N; i++) {
-        sum[i] = sum[i - 1] + mu[i];
     }
 }
