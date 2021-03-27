@@ -29,7 +29,7 @@ struct Dinic {
     }
 
     bool bfs() {
-        for(int i = 0;i <= n; i++) {
+        for(int i = 0;i <= t; i++) {
             deep[i] = -1, cur[i] = head[i];
         }
         queue<int> q;   
