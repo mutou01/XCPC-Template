@@ -38,11 +38,8 @@ ll solve_ex_gcd(ll a, ll b, ll c, ll &x, ll &y)
     }
     x *= (c / d);
     b = abs(b / d);
-    x %= b;
-    while(x < 0) {
-        x += b;
-    }
-    y = (c - a * x) / b;
+    x = (x % b + b) % b;
+    y = (c - a * x) / (b * d);
     return 0;
 }
 
