@@ -1,0 +1,101 @@
+概念：
+字符串hash即将字符串转换成一个整数，后通过数字匹配判断字符匹配，故我们希望每个字符串都能够形成确定的映射值，即单映射。
+p：一般有多少种不同的字符就设置为多少（由于过大的p十分容易溢出long long的数据范围，故引入mod）
+mod:与mod互为素数，限制的hash值表示字符串的个数（产生冲突的主要原因）
+
+
+适用问题：
+字符串及其子串匹配
+
+步骤：
+选取q与mod，防止冲突。
+遍历求hash值。
+遍历查值。
+
+例子：
+团结就是力量（字符串hash求子串匹配+基数数组）
+https://ac.nowcoder.com/acm/problem/14411
+多校08-I——字符串hash+循环同构（所有循环同构比较hash值）
+http://acm.hdu.edu.cn/showproblem.php?pid=6863
+        
+模板：
+#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<string>
+#include<vector>
+#include<set>
+#include<map>
+#include<math.h>
+using namespace std;
+typedef long long ll;
+const ll mod = 1e7 + 7;
+const ll bas = 1231;	//bas与mode互质 
+const int INF = 0x3f3f3f3f;
+const int N = 5e6 + 10;
+int Case;
+int n, m, k;
+int num;
+ll num1[N];
+ll h[N];	//记录前i个字符的子串的hash值 
+ll b[N];	//前i个bas的预处理（前i个bas的积） 
+ll min1 = INF, max1 = 0;
+int count1 = 0;
+ll ans;
+char s[N];
+set<ll> st;
+
+void initha(int k) {	//求t的所有循环同构的hash 
+	st.clear();
+	ll hh = 0;
+	for (int i = 0; i < k; i++) {
+		hh = ((h[k] - h[i] * b[k - i] % mod + mod) * b[i] % mod + h[i]) % mod;	//若理解了子串hash值，则循环同构hash值为，将区间（i,k）hash值*b[k-i](前移i位)+h[i]
+		st.insert(hh);
+	}
+}
+
+ll ha(int l, int r) {	//字符串从(l,r)的hash值（子串hash值）
+	return (h[r] - h[l - 1] * b[r - l + 1] % mod + mod) % mod;	//前r个字符的hash值=s[0]*b[r]+s[1]*b[r-1]...,故相减，即第一个括号内得到s[r]*b[r-r]+s[r-1]*b[1]+s[r-2]*b[1]...
+}												//也就是字符串（l,r）的hash值，最多（r-l）次bas
+
+int check() {
+	int f = 0;
+	for (int i = 1; i <= n; i++) {	//前i项字符hash值
+		h[i] = (h[i - 1] * bas % mod + s[i] - 'a') % mod;
+	}
+	for (int i = 1; i < n; i++) {	//子串长度 
+		if (n % i == 0) {
+			initha(i);
+			f = 1;
+			for (int j = i + 1; j + i - 1 <= n; j += i)
+				if (!st.count(ha(j, j + i - 1))) {
+					f = 0;
+					break;
+				}
+		}
+		if (f)
+			return true;
+	}
+	return false;
+}
+
+int main() {
+	scanf("%d", &Case);
+	b[0] = 1;
+	for (int i = 1; i < N; i++)
+		b[i] = b[i - 1] * bas % mod;
+	while (Case--) {
+		int flag = 1;
+		scanf("%d", &n);
+		scanf("%s", s + 1);
+		if (check())
+			printf("Yes\n");
+		else
+			printf("No\n");
+	}
+}
+
+注：
+若需反复对子串求解hash值，可预处理p次方的值。
+
