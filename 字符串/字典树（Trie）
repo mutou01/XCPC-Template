@@ -1,0 +1,92 @@
+概念：
+字典树：多叉树，每个节点记录代表字母，单词结束时作长度（比较字符串中的位置）、次数（比较字符串中作为前缀出现次数）标记。字母表：不同的字符个数（ALTN<=200）、字符长度(MAXN>>1e4)
+
+适用问题：
+最短区别前缀、字符串前缀与后缀匹配。
+
+例子：
+hihocoder1014 Trie树(Trie模板题，题有提示，修改flag即可。求匹配字符串组（作为前缀）在字典中的最多匹配数)
+http://hihocoder.com/problemset/problem/1014
+hihocoder1366 逆序单词(先正序查询，再逆序输入)
+http://hihocoder.com/problemset/problem/1366
+
+步骤：
+数据结构（每个节点最多会有ALTN个孩子，初始化为NULL，同时需要一个标记，注明单词是否结束（AC自动机中一般定义为单词长度））
+
+图例：
+
+模板：
+#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
+#include<algorithm>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+typedef long long ll;
+const ll MAXN = 1e5+5;	//字符长度(MAXN>>1e4)
+const int ALTN = 26;	//字母表：不同的字符个数
+int Case;
+int n, m, k;
+char s1[MAXN];
+char s2[MAXN];
+
+struct Node {
+	Node* next[ALTN];
+	int flag;	//该单词出现次数（单词结束才会有值，否则为0）（AC自动机中一般定义为单词长度））
+	Node() {
+		for (int i = 0; i < ALTN; i++) 
+			next[i] = nullptr;	//C++11标准正式引入nullptr作为空指针常量
+		flag = 0;
+	}
+};
+
+Node* root;
+
+void init() {
+	root = new Node();
+}
+
+void ins(char* s) {
+	int len = strlen(s);
+	Node* now = root;
+	for (int i = 0; i < len; i++) {
+		int to = s[i] - 'a';	//假设字母表中只有小写字母，当然可以用hash使得每个字符都有不同to
+		if (now->next[to] == nullptr)
+			now->next[to] = new Node();
+		now = now->next[to];
+	}
+	now->flag ++;	//s输入结束时，单词结束，出现次数++
+}
+
+int fid(char* s) {
+	int len = strlen(s);
+	Node* now = root;
+	for (int i = 0; i < len; i++) {
+		int to = s[i] - 'a';	
+		if (now->next[to] == nullptr)
+			return 0;
+		else
+			now = now->next[to];
+	}
+	return now->flag;	//输出单词出现次数
+}
+
+int main() {
+	while (~scanf("%d", &n)) {
+		init();
+		while (n--) {
+			scanf("%s", s1);
+			ins(s1);
+		}
+		scanf("%d", &m);
+		while (m--) {
+			scanf("%s", s2);
+			printf("%d\n", fid(s2));
+		}
+	}
+}
+
+注：
+
+
+
