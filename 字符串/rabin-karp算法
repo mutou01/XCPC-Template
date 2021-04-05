@@ -1,0 +1,190 @@
+概念：
+rabin-karp算法：将模式串转换为hash值，在匹配串中寻找相同hash值，由于存在hash冲突，故再在hash确定的区间内进行单个字符串匹配
+模式串长度为len，建立长度为len的滑动窗口，各求得hash之后进行hash值的比较，判断是否相等
+不匹配则向右滑动，同时为避免重复运算，用已知的第一个窗口的hash值求解第二个窗口的hash值
+首先减去最左端位置字符的hash值，整体乘上BAS，再加上新窗口最右端位置字符的hash值，重复滑动即可
+
+综上：利用hash函数加速字符串匹配，滑动窗口避免重复运算（去原最左hash值，乘*BAS，加最右hash值）
+
+传统的字符串匹配都是每个字符的比较（KMP、AC自动机）
+
+适用问题：
+最长重复子序列（例：ababcabab）->abab
+
+例子：
+LC1044 最长重复子串（二分+rabin-karp，二分控制长度，rabin-karp求是否存在重复子串）
+https://leetcode-cn.com/problems/longest-duplicate-substring/
+
+步骤：
+
+图例：
+
+模板：
+#define _CRT_SECURE_NO_WARNINGS
+#include<string>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<iostream>
+#include<cmath>
+#include<unordered_set>
+#include<unordered_map>
+using namespace std;
+const int mod = 1e7 + 7;
+const int maxn = 10;
+typedef long long ll;
+ll b[maxn];
+ll ha[maxn];
+string s;
+unordered_map<ll,ll>mp;
+
+bool check(string& s,ll k) {
+	ll hash=0;
+	ll bas = 1;
+	ll len = s.size();
+	for (int i = 0; i < k; i++) {
+		hash = (hash * 26 + s[i] - 'a') % mod;
+		bas = bas * 26 % mod;
+	}
+	unordered_set<ll> h;
+	h.insert(hash);
+	for (int i = k; i < len; i++) {
+		hash = (hash * 26 + s[i] - 'a') % mod;
+		hash = (hash - (s[i - k] - 'a') * bas) % mod;	//长度为k的，[i-k,i]的hash值
+		if (h.count(hash)) {		//若h中存在该hash值，则找到重复子串
+			mp[k] = i - k + 1;		//存长度
+			return true;
+		}
+		h.insert(hash);
+	}
+	return false;
+}
+
+int main() {
+	cin >> s;
+	ll n = s.size();
+	ll l = 1, r = n, mid;
+	while (l < r) {
+		mid = (l + r) >> 1;
+		if (check(s,mid))	//二分查找最大重复子串.
+//模拟：l=1,r=n,mid=(1+n)/2，查找长度为mid的重复子串，若存在，l=mid+1，mid=(3+3n)/4,若不存在r=mid,mid=(2+n)/4,即通过二分达到长度变化，再用Rabin-Karp找重复子串
+			l = mid + 1;	//扩大匹配字符串长度
+		else
+			r = mid;
+	}
+	cout<<s.substr(mp[l - 1], l - 1)<<endl;
+}
+
+
+注：
+const int A = 1024, B = 128;
+const uint E = 27;
+char text[A][A];
+char patt[B][B];
+
+uint ht, hp;
+uint pw[B * B];
+uint hor[A];
+uint ver[A][A];
+
+int n, m, x, y;
+
+void init()
+{
+    int i, j = B * B;
+    for (i = 1, pw[0] = 1; i < j; i++)
+    {
+        pw[i] = pw[i - 1] * E;
+    }
+    return ;
+}
+
+void hash()
+{
+    int i, j;
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0, hor[i] = 0; j < y; j++)
+        {
+            hor[i] *= pw[x];
+            hor[i] += text[i][j] - 'a';
+        }
+    }
+    for (j = 0; j < m; j++)
+    {
+        for (i = 0, ver[0][j] = 0; i < x; i++)
+        {
+            ver[0][j] *= E;
+            ver[0][j] += text[i][j] - 'a';
+        }
+        for (i = 1; i <= n - x; i++)
+        {
+            ver[i][j] = (ver[i - 1][j] - (text[i - 1][j] - 'a') * pw[x - 1]) * E + text[i + x - 1][j] - 'a';
+        }
+    }
+    for (j = 0, ht = hp = 0; j < y; j++)
+    {
+        for (i = 0; i < x; i++)
+        {
+            ht *= E;
+            ht += text[i][j] - 'a';
+            hp *= E;
+            hp += patt[i][j] - 'a';
+        }
+    }
+    return ;
+}
+
+void read()
+{
+    int i;
+    std::cin >> n >> m;
+    for (i = 0; i < n; i++)
+    {
+        std::cin >> text[i];
+    }
+    for (i = 0; i < x; i++)
+    {
+        std::cin >> patt[i];
+    }
+    return ;
+}
+
+int solve()
+{
+    if (n == 0 || m == 0 || x == 0 || y == 0)
+    {
+        return 0;
+    }
+    int i, j, cnt = 0;
+    uint t;
+    for (i = 0; i <= n - x; i++)
+    {
+        for (j = 0, t = ht; j <= m - y; j++)
+        {
+            if (t == hp)
+            {
+                cnt++;
+            }
+            t = (t - ver[i][j] * pw[y * x - x]) * pw[x] + ver[i][j + y];
+        }
+        ht = (ht - hor[i] * pw[x - 1]) * E + hor[i + x];
+    }
+    return cnt;
+}
+
+int main(int argc, const char * argv[])
+{
+    int T;
+
+    init();
+    for (std::cin >> T; T; T--)
+    {
+        read();
+        hash();
+        std::cout << solve() << '\n';
+    }
+
+    return 0;
+}
+
